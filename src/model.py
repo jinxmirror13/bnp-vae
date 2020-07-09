@@ -16,6 +16,12 @@ from var_inf import VarInf
 from io import open
 from itertools import imap
 
+#######################################################################
+### BNP-VAE
+# Defining the architecture and training procedures for this model.
+#
+# See further details below and in the paper.
+#######################################################################
 
 class Model(object):
   def __init__(self, batch_size, output_dir):
@@ -24,7 +30,10 @@ class Model(object):
     self.squashing = tf.nn.sigmoid
     self.output_dir = output_dir
 
+#   Model defined as a graph, building out framework to fill later
     self.session = tf.Session(config=tf.ConfigProto(log_device_placement=False))
+
+#   Build graph using function below
     handles = self.buildGraph()
     self.session.run(tf.initialize_all_variables())
     #self.session.run(tf.contrib.layers.xavier_initializer(uniform=False))
