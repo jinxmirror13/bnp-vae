@@ -9,6 +9,13 @@ import cPickle
 from sklearn.cluster import MiniBatchKMeans
 from sklearn.metrics import silhouette_samples
 
+#######################################################
+# Variational Inference Object
+#
+# 
+#######################################################
+
+
 class VarInf(object):
   def __init__(self):
     # initialize variational parameters
@@ -22,6 +29,11 @@ class VarInf(object):
 
   @staticmethod
   def weighted_kmeans(data, weights, K):
+    """
+    data: uhh... the data ?
+    weight: 
+    K: Number of features
+    """
     N = np.size(data, 0)
     D = np.size(data, 1)
     # initialize centers
