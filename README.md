@@ -1,4 +1,4 @@
-# Nonparametric Variational Auto-Encoders for Hierarchical Representation Learning
+# [Nonparametric Variational Auto-Encoders for Hierarchical Representation Learning](https://openaccess.thecvf.com/content_iccv_2017/html/Goyal_Nonparametric_Variational_Auto-Encoders_ICCV_2017_paper.html)
 
 Prasoon Goyal, Zhiting Hu, Xiaodan Liang, Chenyu Wang, Eric P. Xing
 
