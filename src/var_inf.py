@@ -30,24 +30,42 @@ class VarInf(object):
   @staticmethod
   def weighted_kmeans(data, weights, K):
     """
-    data: uhh... the data ?
-    weight: 
-    K: Number of features
+    Calculate the centre points (K of them) for the data set
+
+    Assumes points surround center [0]*D, relies on given weights
+
+    Params:
+      data: uhh... the data ?
+      weights: given weights of the points for this procedure
+      K: Number of centres
+    Returns:
+      centers: matrix [K x D] of selected data points that are "centres" ? mediods? FIXME
     """
-    N = np.size(data, 0)
-    D = np.size(data, 1)
+    N = np.size(data, 0) # Number of data points
+    D = np.size(data, 1) # Number of features
     # initialize centers
-    centers = np.zeros(shape=(K, D))
-    init_weights = weights / np.sum(weights)
-    closest_cluster_dist = np.ones(shape=N) / N
+    centers = np.zeros(shape=(K, D)) # Empty array to hold multivariate centers
+    init_weights = weights / np.sum(weights) # Normalise the initial weights
+    closest_cluster_dist = np.ones(shape=N) / N # Random decimal initialisation? FIXME
+
+    # For K rounds, select a data point based on the max weighted distance to be centre
     for k in range(K):
       idx = np.argmax(VarInf.normalize(init_weights * closest_cluster_dist))
-      centers[k, :] = data[idx, :]
+      centers[k, :] = data[idx, :] # Use selected data point as centre
       for n in range(N):
+        # Redefine distances with respect to next cluster center (always [0]*D)
         closest_cluster_dist[n] = np.min(np.linalg.norm(data[n, :] - centers[:k+1, :], axis=1))
     return centers
 
   def get_phi_leaves(self, idx):
+    """
+    Iterates through the tree to fetch leaf nodes and their phi values (??) FIXME
+
+    Params:
+      idx: An index
+    Returns:
+      result: [dictionary] Map of leaf nodes to respective phi[idx][0]
+    """
     result = {}
     unvisited_nodes = [self.root]
     while len(unvisited_nodes) > 0:
@@ -60,17 +78,30 @@ class VarInf(object):
     return result
 
   def get_true_path_mean(self, x_annot_batch):
+    """
+    Do standard VAE?? It returns a list [x_annot_batch] of list 
+    [LATENT_CODE_SIZE] of zeros... FIXME
+
+    Params:
+      x_annot_batch: ?? FIXME
+    Returns:
+      true_path_mu_batch: List [x_annot_batch] of list 
+          [LATENT_CODE_SIZE] of zeros
+    """
     true_path_mu_batch = []
     indices = []
     for x_annot in x_annot_batch:
+      # vidid: FIXME
+      # frameid: FIXME
       (vidid, frameid) = x_annot
       # standard VAE
       true_path_mu_batch.append(np.zeros(shape=LATENT_CODE_SIZE))
-      continue
+      continue # So this skips the rest of the loop code??
       if len(self.vidid_frameid_to_idx) == 0:
         # no paths initiated
         true_path_mu_batch.append(np.zeros(shape=LATENT_CODE_SIZE))
       else:
+        # Paths initiated
         idx = self.vidid_frameid_to_idx.index((vidid, frameid))
         phi = self.get_phi_leaves(idx)
         keys = phi.keys()
@@ -82,6 +113,14 @@ class VarInf(object):
     return np.asarray(true_path_mu_batch)
 
   def get_matrix_from_dict(self, latent_codes):
+    """
+    TODO
+
+    Params:
+      latent_codes:
+    Returns:
+      result: 
+    """
     if len(self.vidid_to_idx) == 0:
       for vidid in latent_codes:
         self.vidid_to_idx.append(vidid)
@@ -94,6 +133,14 @@ class VarInf(object):
     return np.asarray(result)
 
   def update_variational_parameters(self, latent_codes):
+    """
+    TODO - Self-editing of object variables
+
+    Params:
+      latent_codes:
+    Returns:
+      Nothing 
+    """
     print 'Performing variational inference...'
     print 'Memory usage: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
     latent_codes_matrix = self.get_matrix_from_dict(latent_codes)
@@ -159,6 +206,15 @@ class VarInf(object):
                              STDEV_THR + 100.0 * np.exp(-1.0*self.decay_coeff))
 
   def print_stdev(self, node, latent_codes_matrix):
+    """
+    TODO
+
+    Params:
+      node:
+      latent_codes_matrix:
+    Returns:
+      Nothing
+    """
     if node.isLeafNode:
       stdev = np.sqrt(np.linalg.norm(np.sqrt(node.phi) * (latent_codes_matrix - node.alpha)) \
                       / np.sum(node.phi))
@@ -177,6 +233,15 @@ class VarInf(object):
         self.print_all_param_values(c)
 
   def initialize_phi(self, node, init_values):
+    """
+    TODO
+
+    Params:
+      node:
+      init_values:
+    Returns:
+      Nothing 
+    """
     if node.isLeafNode:
       node.phi = np.reshape(init_values[node.node_id], (len(self.vidid_frameid_to_idx), 1))
     else:
@@ -201,6 +266,16 @@ class VarInf(object):
         self.print_gamma(c)
 
   def merge_nodes(self, node, latent_codes_matrix, split_thr):
+    """
+    TODO
+
+    Params:
+      node:
+      latent_codes_matrix:
+      split_thr:
+    Returns:
+      Nothing
+    """
     print 'merge_nodes', node.node_id
     if node.isLeafNode:
       if np.mean(node.phi) < 10**-3:
@@ -223,6 +298,16 @@ class VarInf(object):
           c.parent = node
 
   def split_nodes(self, node, latent_codes_matrix, split_thr):
+    """
+    TODO
+
+    Params:
+      node:
+      latent_codes_matrix:
+      split_thr:
+    Returns:
+      result:
+    """
     print 'split_nodes', node.node_id
     if node.isLeafNode:
       # compute variance
@@ -251,6 +336,15 @@ class VarInf(object):
       return result
 
   def compute_sigma_alpha_node(self, node, latent_codes_matrix):
+    """
+    TODO
+
+    Params:
+      node:
+      latent_codes_matrix:
+    Returns:
+      Nothing
+    """
     if node.isLeafNode:
       sum_phi = np.sum(node.phi)
       sum_phi_z = np.sum(node.phi * latent_codes_matrix, axis=0)
@@ -275,6 +369,15 @@ class VarInf(object):
       node.alpha = node.alpha * SIGMA_B_sqrinv / node.sigmasqr_inv
 
   def compute_sigma_node(self, node, latent_codes_matrix):
+    """
+    TODO
+
+    Params:
+      node:
+      latent_codes_matrix:
+    Returns:
+      Nothing
+    """
     if node.isLeafNode:
       sum_phi = np.sum(node.phi)
       sum_phi_z = np.sum(node.phi * latent_codes_matrix, axis=0)
@@ -287,6 +390,15 @@ class VarInf(object):
       node.sigmasqr_inv = (1.0 + len(node.children)) * SIGMA_B_sqrinv
 
   def compute_alpha_node(self, node, latent_codes_matrix):
+    """
+    TODO
+
+    Params:
+      node:
+      latent_codes_matrix:
+    Returns:
+      Nothing
+    """
     if node.isLeafNode:
       sum_phi = np.sum(node.phi)
       sum_phi_z = np.sum(node.phi * latent_codes_matrix, axis=0)
@@ -309,20 +421,57 @@ class VarInf(object):
       node.alpha = node.alpha * SIGMA_B_sqrinv / node.sigmasqr_inv
 
   def compute_sigma_alpha(self, latent_codes_matrix):
+    """
+    TODO
+
+    Params:
+      latent_codes_matrix:
+    Returns:
+      Nothing
+    """
     self.compute_sigma_node(self.root, latent_codes_matrix)
     self.compute_alpha_node(self.root, latent_codes_matrix)
 
   @staticmethod
   def digamma_add0(gamma_sum, new_gamma):
+    """
+    TODO
+
+    Params:
+      gamma_sum:
+      new_gamma:
+    Returns:
+      calculation... TODO
+    """
     return gamma_sum + digamma(new_gamma[:, 0]) - digamma(np.sum(new_gamma, axis=1))
 
   @staticmethod
   def digamma_add1(gamma_sum, new_gamma):
+    """
+    TODO
+
+    Params:
+      gamma_sum:
+      new_gamma:
+    Returns:
+      calculation... TODO
+    """
     if gamma_sum is None:
       return digamma(new_gamma[:, 1]) - digamma(np.sum(new_gamma, axis=1))
     return gamma_sum + digamma(new_gamma[:, 1]) - digamma(np.sum(new_gamma, axis=1))
 
   def compute_phi_node(self, node, latent_codes_matrix, gamma_sum_on, gamma_sum_before):
+    """
+    TODO
+
+    Params:
+      node:
+      latent_codes_matrix:
+      gamma_sum_on:
+      gamma_sum_before:
+    Returns:
+      Nothing
+    """
     if node.isLeafNode:
       scaled_dist = 0.5 * SIGMA_Z_sqrinv * \
                     (np.linalg.norm(latent_codes_matrix - node.alpha, axis=1) + \
@@ -337,6 +486,14 @@ class VarInf(object):
        self.compute_phi_node(c, latent_codes_matrix, gamma_sum_on, gamma_sum_before)
 
   def get_phi_min(self, node):
+    """
+    TODO
+
+    Params:
+      node:
+    Returns:
+      phi_min:
+    """
     if node.isLeafNode:
       return node.phi
     else:
@@ -346,6 +503,14 @@ class VarInf(object):
       return phi_min
 
   def get_phi_sum(self, node):
+    """
+    TODO
+
+    Params:
+      node:
+    Returns:
+      phi_sum:
+    """
     if node.isLeafNode:
       return node.phi
     else:
@@ -355,6 +520,15 @@ class VarInf(object):
       return phi_sum
 
   def normalize_phi(self, node, phi_sum):
+    """
+    TODO
+
+    Params:
+      node:
+      phi_sum:
+    Returns:
+      Nothing
+    """
     if node.isLeafNode:
       node.phi /= phi_sum
     else:
@@ -362,6 +536,15 @@ class VarInf(object):
         self.normalize_phi(c, phi_sum)
 
   def exponentiate_phi(self, node, offset):
+    """
+    TODO
+
+    Params:
+      node:
+      offset:
+    Returns:
+      Nothing
+    """
     if node.isLeafNode:
       node.phi = np.exp((node.phi - offset))
     else:
@@ -369,6 +552,16 @@ class VarInf(object):
         self.exponentiate_phi(c, offset)
 
   def compute_gamma_sum_on(self, node, curr_path_sum, result):
+    """
+    TODO
+
+    Params:
+      node:
+      curr_path_sum:
+      result:
+    Returns:
+      result:
+    """
     if not(node.parent is None):
       curr_path_sum = VarInf.digamma_add0(curr_path_sum, node.gamma)
     if node.isLeafNode:
@@ -380,6 +573,16 @@ class VarInf(object):
       return result
 
   def compute_gamma_sum_before(self, node, curr_path_before, result):
+    """
+    TODO
+
+    Params:
+      node:
+      curr_path_sum:
+      result:
+    Returns:
+      digamma update? TODO
+    """
     if node.isLeafNode:
       result.update({node: curr_path_before})
       return VarInf.digamma_add1(None, node.gamma), result
@@ -393,6 +596,14 @@ class VarInf(object):
       return VarInf.digamma_add1(sum_children, node.gamma), result
 
   def compute_phi(self, latent_codes_matrix):
+    """
+    TODO
+
+    Params:
+      latent_codes_matrix:
+    Returns:
+      Nothing
+    """
     gamma_sum_on = self.compute_gamma_sum_on(self.root, \
                         np.zeros(shape=len(self.vidid_to_idx)), {})
     _, gamma_sum_before = self.compute_gamma_sum_before(self.root, \
@@ -405,6 +616,15 @@ class VarInf(object):
     phi_sum = self.get_phi_sum(self.root)
 
   def compute_gamma_node(self, node, sum_phi_before):
+    """
+    TODO
+
+    Params:
+      node:
+      sum_phi_before:
+    Returns:
+      sum_phi_curr and sum_phi_children:
+    """
     if node.isLeafNode:
       if node.parent is None:
         node.gamma = None
@@ -425,10 +645,26 @@ class VarInf(object):
       return sum_phi_children
 
   def compute_gamma(self):
+    """
+    TODO
+
+    Params:
+      None
+    Returns:
+      Compute Gamma node...
+    """
     self.compute_gamma_node(self.root, np.zeros(shape=len(self.vidid_to_idx)))
 
   @staticmethod
   def normalize(p):
+    """
+    TODO
+
+    Params:
+      p:
+    Returns:
+      calculation... TODO
+    """
     p = np.asarray(p)
     s = np.sum(p)
     if s > 0:
@@ -437,11 +673,27 @@ class VarInf(object):
       return VarInf.normalize(np.ones(shape=np.shape(p)))
 
   def write_gamma(self, filename):
+    """
+    TODO
+
+    Params:
+      filename:
+    Returns:
+      Nothing
+    """
     with open(filename, 'w') as f:
       for vidid in self.gamma:
         f.write(vidid + '\t' + unicode(self.gamma[vidid]) + '\n')
 
   def write_assignments(self, filename):
+    """
+    TODO
+
+    Params:
+      filename:
+    Returns:
+      Nothing
+    """
     with open(filename, 'w') as f:
       for vidid in self.phi:
         for frameid in self.phi[vidid]:
@@ -449,6 +701,15 @@ class VarInf(object):
                   unicode(np.argmax(self.phi[vidid][frameid])) + '\n')
 
   def write_alpha_node(self, node, fileptr):
+    """
+    TODO
+
+    Params:
+      node:
+      fileptr:
+    Returns:
+      Nothing
+    """
     fileptr.write(node.node_id + ' ' + \
                   ' '.join(map(lambda x: str(np.round(x, 2)), node.alpha)) + \
                   '\n')
@@ -457,11 +718,28 @@ class VarInf(object):
         self.write_alpha_node(c, fileptr)
 
   def write_alpha(self, filename):
+    """
+    TODO
+
+    Params:
+      filename:
+    Returns:
+      Nothing
+    """
     fileptr = open(filename, 'w')
     self.write_alpha_node(self.root, fileptr)
     fileptr.close()
       
   def write_sigma_node(self, node, fileptr):
+    """
+    TODO
+
+    Params:
+      node:
+      fileptr:
+    Returns:
+      Nothing
+    """
     fileptr.write(node.node_id + ' ' + \
                   ' '.join(map(lambda x: str(np.round(x, 2)), [node.sigmasqr_inv])) + \
                   '\n')
@@ -470,11 +748,28 @@ class VarInf(object):
         self.write_sigma_node(c, fileptr)
 
   def write_sigma(self, filename):
+    """
+    TODO
+
+    Params:
+      filename:
+    Returns:
+      Nothing
+    """
     fileptr = open(filename, 'w')
     self.write_sigma_node(self.root, fileptr)
     fileptr.close()
 
   def get_nodes_list(self, node, result):
+    """
+    TODO
+
+    Params:
+      node:
+      result:
+    Returns:
+      result
+    """
     if node.isLeafNode:
       result.append(node)
     else:
@@ -484,12 +779,29 @@ class VarInf(object):
     return result
 
   def write_nodes(self, filename):
+    """
+    TODO
+
+    Params:
+      filename:
+    Returns:
+      Nothing
+    """
     nodes_list = self.get_nodes_list(self.root, [])
     fileptr = open(filename, 'wb')
     cPickle.dump(nodes_list, fileptr)
     fileptr.close()
 
   def get_alpha_leaves_node(self, node, result):
+    """
+    TODO
+
+    Params:
+      node:
+      result:
+    Returns:
+      result
+    """
     print node.node_id, len(result)
     if node.isLeafNode:
       result.update({node.node_id: node.alpha})
@@ -500,4 +812,12 @@ class VarInf(object):
       return result
 
   def get_alpha_leaves(self):
+    """
+    TODO
+
+    Params:
+      None
+    Returns:
+      Leaf node
+    """
     return self.get_alpha_leaves_node(self.root, {})
