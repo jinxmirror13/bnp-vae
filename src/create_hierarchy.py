@@ -7,7 +7,12 @@ import cPickle
 from PIL import Image
 
 '''
-python compute_acc_frame.py /scratch/ans556/prasoon/all_models/models_test/alpha_140000.txt /scratch/ans556/prasoon/all_models/models_test/z_150000.txt /work/ans556/prediction_test/output_15k_z_train.txt 256 /scratch/ans556/prasoon/data/MED/MED11/train_label.txt /scratch/ans556/prasoon/data/MED/MED11/train_label.txt
+python compute_acc_frame.py \
+  /scratch/ans556/prasoon/all_models/models_test/alpha_140000.txt \
+  /scratch/ans556/prasoon/all_models/models_test/z_150000.txt \
+  /work/ans556/prediction_test/output_15k_z_train.txt 256 \
+  /scratch/ans556/prasoon/data/MED/MED11/train_label.txt \
+  /scratch/ans556/prasoon/data/MED/MED11/train_label.txt
 '''
 
 def get_alpha_leaves(node, result):

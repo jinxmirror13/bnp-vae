@@ -10,7 +10,7 @@ from sklearn.cluster import MiniBatchKMeans
 from sklearn.metrics import silhouette_samples
 
 #######################################################
-# Variational Inference Object
+### Variational Inference Object
 #
 # 
 #######################################################
@@ -21,8 +21,12 @@ class VarInf(object):
     # initialize variational parameters
     self.root = None
     self.decay_coeff = 0.0
+
+    # Frame = x?? FIXME
     self.vidid_frameid_to_idx = []
     self.vidid_to_idx = []
+
+    # kmeans variable
     self.kmeans_models = {}
     self.kmeans_labels = {}
     self.kmeans_ss = {}
@@ -114,13 +118,15 @@ class VarInf(object):
 
   def get_matrix_from_dict(self, latent_codes):
     """
-    TODO
+    Get matrix from
 
     Params:
-      latent_codes:
+      latent_codes: 
     Returns:
       result: 
     """
+    # If vidid_to_idx is empty, 
+    #   then 
     if len(self.vidid_to_idx) == 0:
       for vidid in latent_codes:
         self.vidid_to_idx.append(vidid)
@@ -139,7 +145,7 @@ class VarInf(object):
     Params:
       latent_codes:
     Returns:
-      Nothing 
+      Nothing
     """
     print 'Performing variational inference...'
     print 'Memory usage: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss

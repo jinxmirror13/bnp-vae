@@ -5,10 +5,18 @@ from __future__ import absolute_import
 import numpy as np
 import tensorflow as tf
 
-# Convolution followed by pooling. Convolution always uses stride of 1, to
-# generate output of the same size as the input for easier reversibility.
-# The stride for pooling is the same as the kernel size, for easier reversibility.
+#######################################################################
+### VGG-16 Network [citation 17 in the paper]
+# 
+# Trained on ImageNet dataset
+#######################################################################
+
 class ConvPool(object): 
+  """ 
+  Convolution followed by pooling. Convolution always uses stride of 1, to
+    generate output of the same size as the input for easier reversibility.
+  The stride for pooling is the same as the kernel size, for easier reversibility.
+  """
   def __init__(self, scope="conv_pool", conv_kernel_size=None, conv_output_channels=None,
                pool_size=None, nonlinearity=tf.identity, w_init=None, b_init=None):
     self.scope = scope
@@ -33,9 +41,12 @@ class ConvPool(object):
                            [1, pool_size, pool_size, 1], "SAME")
     return x_pool
 
-# Similar to ConvPool -- implements deconv as convolution; unpool as upsampling using
-# bilinear interpolation
+
 class DeconvUnpool(object): 
+  """
+  Similar to ConvPool -- implements deconv as convolution; unpool as upsampling using
+    bilinear interpolation
+  """
   def __init__(self, scope="conv_pool", conv_kernel_size=None, conv_output_channels=None,
                pool_size=None, nonlinearity=tf.identity):
     self.scope = scope
@@ -74,7 +85,9 @@ class DeconvUnpool(object):
     return x_conv
 
 class Dense_NoShare():
-    """Fully-connected layer"""
+    """
+    Fully-connected layer
+    """
     def __init__(self, scope="dense_layer", size=None, dropout=1.,
                  nonlinearity=tf.identity):
         # (str, int, (float | tf.Tensor), tf.op)
@@ -85,7 +98,9 @@ class Dense_NoShare():
         self.nonlinearity = nonlinearity
 
     def __call__(self, x, dropout=None):
-        """Dense layer currying, to apply layer to any input tensor `x`"""
+        """
+        Dense layer currying, to apply layer to any input tensor `x`
+        """
         # tf.Tensor -> tf.Tensor
         with tf.name_scope(self.scope):
             while True:
@@ -101,7 +116,8 @@ class Dense_NoShare():
 
     @staticmethod
     def wbVars(fan_in, fan_out):
-        """Helper to initialize weights and biases, via He's adaptation
+        """
+        Helper to initialize weights and biases, via He's adaptation
         of Xavier init for ReLUs: https://arxiv.org/abs/1502.01852
         """
         # (int, int) -> (tf.Variable, tf.Variable)
@@ -115,7 +131,9 @@ class Dense_NoShare():
 
 
 class Dense_Share(object):
-  """Fully-connected layer"""
+  """
+  Fully-connected layer
+  """
   def __init__(self, scope="dense_layer", size=None, dropout=1.,
          nonlinearity=tf.identity, w_init=None, b_init=None, isdecoder=False):
     self.scope = scope
@@ -125,7 +143,9 @@ class Dense_Share(object):
     self.nonlinearity = nonlinearity
 
   def __call__(self, x):
-    """Dense layer currying, to apply layer to any input tensor `x`"""
+    """
+    Dense layer currying, to apply layer to any input tensor `x`
+    """
     # tf.Tensor -> tf.Tensor
     with tf.variable_scope(self.scope) as scope:
       if self.isdecoder:
@@ -145,7 +165,8 @@ class Dense_Share(object):
   
   @staticmethod
   def wbVars(fan_in, fan_out):
-    """Helper to initialize weights and biases, via He's adaptation
+    """
+    Helper to initialize weights and biases, via He's adaptation
     of Xavier init for ReLUs: https://arxiv.org/abs/1502.01852
     """
     # (int, int) -> (tf.Variable, tf.Variable)
